@@ -2,22 +2,8 @@ import { Config } from 'payload/config';
 import { CollectionConfig } from 'payload/types';
 import { BeforeChangeHook } from 'payload/dist/globals/config/types';
 import * as path from 'path';
-import { Payload } from 'payload';
-import { Collection } from 'payload/dist/collections/config/types';
 
 import { getPlaiceholder } from 'plaiceholder';
-
-const getMediaDirectory = (payload: Payload, collection: Collection) => {
-  const staticDir = collection.config.upload.staticDir;
-
-  if (path.isAbsolute(staticDir)) {
-    return staticDir;
-  }
-
-  const configDir = payload.config.paths.configDir;
-
-  return path.join(configDir, staticDir);
-};
 
 export interface Base64PluginOptions {
   /*
@@ -47,11 +33,8 @@ const generateBase64 =
         return data;
       }
 
-      const mediaDir = getMediaDirectory(req.payload, req.collection);
-
-      const { base64 } = await getPlaiceholder(`/${data.filename}`, {
+      const { base64 } = await getPlaiceholder(req.files.file.data, {
         size,
-        dir: mediaDir,
         removeAlpha,
       });
 
