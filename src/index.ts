@@ -2,10 +2,10 @@ import { Config } from 'payload/config';
 import { CollectionConfig } from 'payload/types';
 import { BeforeChangeHook } from 'payload/dist/globals/config/types';
 import * as path from 'path';
-import sharp from 'sharp';
-import { encode } from 'blurhash';
 import { Payload } from 'payload';
 import { Collection } from 'payload/dist/collections/config/types';
+
+import { getPlaiceholder } from 'plaiceholder';
 
 const getMediaDirectory = (payload: Payload, collection: Collection) => {
   const staticDir = collection.config.upload.staticDir;
@@ -19,7 +19,7 @@ const getMediaDirectory = (payload: Payload, collection: Collection) => {
   return path.join(configDir, staticDir);
 };
 
-export interface BlurhashPluginOptions {
+export interface Base64PluginOptions {
   /*
    * Array of collection slugs that the plugin should apply to.
    * By default, the plugin will apply to all collections with `upload` properties.
@@ -27,38 +27,14 @@ export interface BlurhashPluginOptions {
   collections?: CollectionConfig['slug'][];
 
   /*
-   * Width to resize the image to prior to computing the blurhash.
-   * Default: 32
+   * an integer (between 4 and 64) to adjust the returned placeholder size
+   * Default: 4
    */
-  width?: number;
-
-  /*
-   * Height to resize the image to prior to computing the blurhash.
-   * Default: 32
-   */
-  height?: number;
-
-  /*
-   * X component count to pass to the Blurhash library.
-   * Default: 3
-   */
-  componentX?: number;
-
-  /*
-   * Y component count to pass to the Blurhash library.
-   * Default: 3
-   */
-  componentY?: number;
+  size?: number;
 }
 
-const computeBlurhash =
-  ({
-    collections,
-    width = 32,
-    height = 32,
-    componentX = 3,
-    componentY = 3,
-  }: BlurhashPluginOptions = {}) =>
+const generateBase64 =
+  ({ collections, size = 4 }: Base64PluginOptions = {}) =>
   (incomingConfig: Config): Config => {
     const hook: BeforeChangeHook = async ({ data, req }) => {
       if (!req.collection) {
@@ -66,25 +42,15 @@ const computeBlurhash =
       }
 
       const mediaDir = getMediaDirectory(req.payload, req.collection);
-      const filepath = path.join(mediaDir, data.filename);
 
-      const rawPixels = await sharp(filepath)
-        .resize(width, height)
-        .ensureAlpha(1)
-        .raw()
-        .toBuffer();
-
-      const blurhash = encode(
-        new Uint8ClampedArray(rawPixels),
-        width,
-        height,
-        componentX,
-        componentY,
-      );
+      const { base64 } = await getPlaiceholder(`/${data.filename}`, {
+        size,
+        dir: mediaDir,
+      });
 
       return {
         ...data,
-        blurhash,
+        base64,
       };
     };
 
@@ -105,7 +71,7 @@ const computeBlurhash =
             fields: [
               ...collection.fields,
               {
-                name: 'blurhash',
+                name: 'base64',
                 type: 'text',
               },
             ],
@@ -124,7 +90,7 @@ const computeBlurhash =
               ...webpackConfig.resolve,
               alias: {
                 ...webpackConfig.resolve?.alias,
-                'payload-blurhash-plugin': path.resolve(
+                'payload-base64-plugin': path.resolve(
                   __dirname,
                   './mock-plugin',
                 ),
@@ -140,4 +106,4 @@ const computeBlurhash =
     };
   };
 
-export default computeBlurhash;
+export default generateBase64;
