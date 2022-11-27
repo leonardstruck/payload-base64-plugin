@@ -1,5 +1,3 @@
-
-
 # payload-blurhash-plugin
 
 Payload CMS plugin for automatic base64 encoding of images.
@@ -14,9 +12,7 @@ import generateBase64 from 'payload-blurhash-plugin';
 
 export default buildConfig({
   /* ... */
-  plugins: [
-    generateBase64(),
-  ],
+  plugins: [generateBase64()],
 });
 ```
 
@@ -38,6 +34,11 @@ export interface Base64PluginOptions {
    */
   size?: number;
 
+  /*
+   * turn on/off the alpha channel removal
+   * Default: true
+   */
+  removeAlpha?: boolean;
 }
 ```
 

@@ -31,10 +31,16 @@ export interface Base64PluginOptions {
    * Default: 4
    */
   size?: number;
+
+  /*
+   * turn on/off the alpha channel removal
+   * Default: true
+   */
+  removeAlpha?: boolean;
 }
 
 const generateBase64 =
-  ({ collections, size = 4 }: Base64PluginOptions = {}) =>
+  ({ collections, size = 4, removeAlpha = true }: Base64PluginOptions = {}) =>
   (incomingConfig: Config): Config => {
     const hook: BeforeChangeHook = async ({ data, req }) => {
       if (!req.collection) {
@@ -46,6 +52,7 @@ const generateBase64 =
       const { base64 } = await getPlaiceholder(`/${data.filename}`, {
         size,
         dir: mediaDir,
+        removeAlpha,
       });
 
       return {
