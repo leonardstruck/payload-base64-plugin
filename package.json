@@ -1,6 +1,6 @@
 {
   "name": "payload-base64-plugin",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Payload CMS plugin for automatic base64 encoding of images",
   "main": "lib/index.js",
   "scripts": {
