@@ -50,7 +50,7 @@ const generateBase64 =
       const file = req.files.file;
 
       const { base64 } = await getPlaiceholder(
-        //if file is undefined (e.g. an existing upload object that already has a file uploded) and no base64 property exists,
+        //if file is undefined (e.g. an existing upload object that already has a file uploaded) and no base64 property exists,
         //it will be created by the getOriginalDocBuffer and then parsed into getPlaiceholder
         file && !data.base64
           ? file.data
