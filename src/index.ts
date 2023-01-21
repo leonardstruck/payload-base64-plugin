@@ -2,8 +2,6 @@ import { Config } from 'payload/config';
 import { CollectionConfig } from 'payload/types';
 import { BeforeChangeHook } from 'payload/dist/globals/config/types';
 import * as path from 'path';
-import * as fs from 'fs';
-import * as http from 'http';
 import axios from 'axios';
 
 import { getPlaiceholder } from 'plaiceholder';
