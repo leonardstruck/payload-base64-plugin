@@ -2,6 +2,7 @@ import { Config } from 'payload/config';
 import { CollectionConfig } from 'payload/types';
 import { BeforeChangeHook } from 'payload/dist/globals/config/types';
 import * as path from 'path';
+import axios from 'axios';
 
 import { getPlaiceholder } from 'plaiceholder';
 
@@ -25,18 +26,38 @@ export interface Base64PluginOptions {
   removeAlpha?: boolean;
 }
 
+/*  This function is used to get the currently uploaded image
+ *  and convert it into a buffer so it can be parsed into getPlaiceholder
+ */
+const getOriginalDocBuffer = async (originalDoc: any) => {
+  const response = await axios.get(originalDoc.url, {
+    responseType: 'arraybuffer',
+  });
+  const buffer = Buffer.from(response.data, 'utf-8');
+  return buffer;
+};
+
 const generateBase64 =
   ({ collections, size = 4, removeAlpha = true }: Base64PluginOptions = {}) =>
   (incomingConfig: Config): Config => {
-    const hook: BeforeChangeHook = async ({ data, req }) => {
+    const hook: BeforeChangeHook = async ({ data, req, originalDoc }) => {
       if (!req.collection) {
         return data;
       }
 
-      const { base64 } = await getPlaiceholder(req.files.file.data, {
-        size,
-        removeAlpha,
-      });
+      const file = req.files.file;
+
+      const { base64 } = await getPlaiceholder(
+        //if file is undefined (e.g. an existing upload object that already has a file uploaded) and no base64 property exists,
+        //it will be created by the getOriginalDocBuffer and then parsed into getPlaiceholder
+        file && !data.base64
+          ? file.data
+          : await getOriginalDocBuffer(originalDoc),
+        {
+          size,
+          removeAlpha,
+        },
+      );
 
       return {
         ...data,

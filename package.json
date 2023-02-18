@@ -23,6 +23,7 @@
   },
   "homepage": "https://github.com/leonardstruck/payload-base64-plugin#readme",
   "dependencies": {
+    "axios": "^1.2.3",
     "plaiceholder": "^2.5.0"
   },
   "devDependencies": {
